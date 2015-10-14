@@ -15,7 +15,7 @@ class StopWatch(object):
     stopwatch functionality
     """
 
-    def __init__(self,_swtitle):
+    def __init__(self,_swtitle='StopWatch Default'):
         """
         initialize StopWatch object instance
         :param _swtitle: Title for the stop watch
@@ -34,6 +34,26 @@ class StopWatch(object):
                 'laps': 0
             }
         }
+
+    def clocklapcount(self,_clockname='default'):
+        """
+        Get lap count for a given clock
+        :param _clockname: clock name to retrieve lap count
+        :type _clockname: str
+        :return: lap count
+        :rtype: int
+        """
+        return self._clocks[_clockname]['laps']
+
+    def clocktotalsecs(self,_clockname='default'):
+        """
+        Get total time running for a given clock. Ignores if currently running
+        :param _clockname: clock name to retrieve lap count
+        :type _clockname: str
+        :return: time running
+        :rtype: int
+        """
+        return self._clocks[_clockname]['total']
 
     def addclock(self,_clockname,_clocktitle):
         """
@@ -118,6 +138,21 @@ class StopWatch(object):
             return True
         return False
 
+    def startedclocks(self):
+        _startedclocks = []
+        for _clock in self._clocks:
+            if self.isstarted(_clock):
+                _startedclocks.append(_clock)
+        return _startedclocks
+
+    def stoppedclocks(self):
+        _stoppedclocks = []
+        for _clock in self._clocks:
+            if self.isstopped(_clock):
+                _stoppedclocks.append(_clock)
+        return _stoppedclocks
+
+
     def isstopped(self,_clockname='default'):
         """Determines if StopWatch is started and not stopped
         Scenario 1: StopWatch has been started at least once but not stopped (return False)
@@ -140,14 +175,15 @@ class StopWatch(object):
             return True
         return False
 
-    def anyused(self):
+    def usedclocks(self):
         """
-        check if any clock has been used
+        gets clocks that are currently in use
         """
+        _usedclocks = []
         for _clock in self._clocks:
             if self.everused(_clock):
-                return True
-        return False
+                return _usedclocks.append(_clock)
+        return _usedclocks
 
     @staticmethod
     def __humanreadabletime(_secs):
