@@ -15,53 +15,98 @@ class StopWatch(object):
     stopwatch functionality
     """
 
-    def __init__(self):
+    def __init__(self,_swtitle):
         """
         initialize StopWatch object instance
-        :var self._begin: time of last start
-        :type self._begin: timestamp
-        :var self._end: time of last stop
-        :type self._end: timestamp
-        :var self._total: total time in seconds the stopwatch has ran (as of last stop)
-        :type self._total: int
-        :var self._cycles: number of times stopwatch has been started and stopped since init or last reset
-        :type self._cycles: int
+        :param _swtitle: Title for the stop watch
+        :type _swtitle: str
+        :var self._clocks: various clocks being tracked.  'default' is only one setup immediately
+        :type self._clocks: dict
         :return: n/a
         """
-        self._begin = None
-        self._end = None
-        self._total = 0
-        self._cycles = 0
+        self.title = _swtitle
+        self._clocks = {
+            'default': {
+                'title': 'Default',
+                'begin': None,
+                'end': None,
+                'total': 0,
+                'laps': 0
+            }
+        }
 
-    def start(self):
+    def addclock(self,_clockname,_clocktitle):
+        """
+        Add a new clock to the stopwatch
+        :param _clockname: clockname
+        :type _clockname: str
+        """
+        self._clocks[_clockname] = {
+            'title': _clocktitle,
+            'begin': None,
+            'end': None,
+            'total': 0,
+            'laps': 0
+        }
+
+    def start(self,_clockname='default',overridestart=None):
         """
         Sets the start time
         As object can be reused, sets _end to None to ensure _end can't be before _begin
+        :param _clockname: clock name to start
+        :type _clockname: str
         """
-        if self.isstopped():
-            self._begin = time.time()
-            self._end = None
+        _start = overridestart or time.time()
+        if self.isstopped(_clockname):
+            self._clocks[_clockname]['begin'] = _start
+            self._clocks[_clockname]['end'] = None
         else:
             raise StopWatchException('StopWatch is already started')
 
-    def stop(self):
+    def startall(self):
+        """
+        Start all clocks at same time
+        """
+        _start = time.time()
+        for _clock in self._clocks:
+            self.start(_clock)
+
+    def stop(self,_clockname='default',overrideend=None):
         """
         Sets the _end time and adds the difference between start and _end to the _total time so can have
         a running _total time (looping but only want to see how much part of the loop takes over all iterations)
+        :param _clockname: clock name to start
+        :type _clockname: str
         """
-        if self.isstarted():
-            self._end = time.time()
-            self._total += int(self._end - self._begin)
-            self._cycles += 1
+        _end = overrideend or time.time()
+        if self.isstarted(_clockname):
+            self._clocks[_clockname]['end'] = _end
+            self._clocks[_clockname]['total'] += int(self._clocks[_clockname]['end'] - self._clocks[_clockname]['begin'])
+            self._clocks[_clockname]['laps'] += 1
         else:
             raise StopWatchException('StopWatch is already stopped.  It must be started first.')
 
-    def reset(self):
-        """Resets the StopWatch like it was never used"""
-        self._begin = self._end = None
-        self._total = self._cycles = 0
+    def stopall(self):
+        """
+        Stop all clocks at same time
+        """
+        _stop = time.time()
+        for _clock in self._clocks:
+            self.stop(_clock)
 
-    def isstarted(self):
+    def reset(self,_clockname='default'):
+        """Resets the StopWatch like it was never used"""
+        self._clocks[_clockname]['begin'] = self._clocks[_clockname]['end'] = None
+        self._clocks[_clockname]['total'] = self._clocks[_clockname]['laps'] = 0
+
+    def resetall(self):
+        """
+        Reset all clocks
+        """
+        for _clock in self._clocks:
+            self.reset(_clock)
+
+    def isstarted(self,_clockname='default'):
         """Determines if StopWatch is started
         Scenario 1: StopWatch was never used or not used since last reset (return False)
         Scenario 2: StopWatch was started and stopped (return False)
@@ -69,11 +114,11 @@ class StopWatch(object):
         :return: StopWatch start status
         :rtype: bool
         """
-        if self._begin is not None and self._end is None:
+        if self._clocks[_clockname]['begin'] is not None and self._clocks[_clockname]['end'] is None:
             return True
         return False
 
-    def isstopped(self):
+    def isstopped(self,_clockname='default'):
         """Determines if StopWatch is started and not stopped
         Scenario 1: StopWatch has been started at least once but not stopped (return False)
         Scenario 2: StopWatch has been started and stopped (return True)
@@ -81,30 +126,33 @@ class StopWatch(object):
         :return: StopWatch stop status
         :rtype: bool
         """
-        if self._end is not None and self._begin is not None \
-                or not self.everused():
+        if self._clocks[_clockname]['end'] is not None and self._clocks[_clockname]['begin'] is not None \
+                or not self.everused(_clockname):
             return True
         return False
 
-    def everused(self):
+    def everused(self,_clockname='default'):
         """Determines if the StopWatch has ever been started or started again since last reset
         :return: StopWatch used status
         :rtype: bool
         """
-        if self._cycles > 0 or self._begin is not None:
+        if self._clocks[_clockname]['laps'] > 0 or self._clocks[_clockname]['begin'] is not None:
             return True
         return False
 
+    def anyused(self):
+        """
+        check if any clock has been used
+        """
+        for _clock in self._clocks:
+            if self.everused(_clock):
+                return True
+        return False
+
     @staticmethod
-    def __timecalc(_secs):
-        """
-        Converts seconds into a list for days, hours, minutes, seconds
-        :param _secs: number of seconds to 'humanize'
-        :type _secs: int
-        :return: list specifying days, hours, minutes, seconds
-        :rtype: list
-        """
+    def __humanreadabletime(_secs):
         _days = _hrs = _mins = 0.0
+        _timestr = ''
         if _secs >= 60.0:
             _mins = _secs // 60.0
             _secs %= 60.0
@@ -114,39 +162,46 @@ class StopWatch(object):
         if _hrs >= 24.0:
             _days = _hrs // 24.0
             _hrs %= 24.0
-        return [_days, _hrs, _mins, _secs]
+        if _days > 0:
+            _timestr += '%s days ' % _days
+        if _hrs > 0:
+            _timestr += '%s hours ' % _hrs
+        if _mins > 0:
+            _timestr += '%s minutes ' % _mins
+        if _secs > 0:
+            _timestr += '%s seconds' % _secs
+        return _timestr
 
-    def print_duration(self, _label='', onlytime=False):
+    def get_clock_summary(self, onlytime=False,_clockname='default'):
         """
-        Prints the duration seen from start to _end.  Pre-p_ends a custom label if provided
-        :param onlytime: print time only (true) or laps, label as well (false)
-        :type onlytime: bool
+        Retrieves the duration seen from start to _end.  Prepends a custom label if provided
         :param _label: used to customize the duration string when printed
-        :type _label: basestring
+        :type _label: str
         :return: nicely formatted duration string
-        :rtype: basestring
+        :rtype: str
         """
-        if not self.everused():
+        if not self.everused(_clockname):
             _msg = 'StopWatch never used.'
-        elif self._end is None:
+        elif self._clocks[_clockname]['end'] is None:
             raise StopWatchException('StopWatch must be stopped before a duration can be calculated')
         else:
-            _d, _h, _m, _s = self.__timecalc(round(int(self._total), 3))
-            _timestr = ''
-            if _d > 0:
-                _timestr += '%s days ' % _d
-            if _h > 0:
-                _timestr += '%s hours ' % _h
-            if _m > 0:
-                _timestr += '%s minutes ' % _m
-            if _s > 0:
-                _timestr += '%s seconds' % _s
-            if _label != '':
-                _label += ' '
-            if _timestr == '':
-                _timestr = '%s seconds' % self._total
+            _timestr = self.__humanreadabletime(self._clocks[_clockname]['total'])
             if onlytime:
                 _msg = _timestr
             else:
-                _msg = 'STOPWATCH: %sDuration: %s in %s lap(s).' % (_label, _timestr, self._cycles)
+                _msg = '%s: Duration: %s in %s lap(s).' % \
+                       (self._clocks[_clockname]['title'], _timestr, self._clocks[_clockname]['laps'])
+        return _msg
+
+    @property
+    def summary(self):
+        _msg = ''
+        _total = 0
+        _msg += 'Summary for %s stop watch' % self.title
+        _msg += '%s\n' % '='*90
+        for _clock in self._clocks:
+            _msg += '%s\n' % self.get_clock_summary(_clockname=_clock)
+            _total += self._clocks[_clock]['total']
+        _msg += '%s\n' % '='*90
+        _msg += 'Total Duration: %s' % self.__humanreadabletime(_total)
         return _msg
