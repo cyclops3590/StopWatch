@@ -17,16 +17,14 @@ class StopWatchTester(unittest2.TestCase):
         # deals with default clock only so clock name is not to be given
 
         # test trying to stop an an unstarted clock
-        self.assertRaises(StopWatchException, self.stopwatch.stop(),
-                          'Clock did not throw error when stopping unused clock')
+        self.assertRaises(StopWatchException, self.stopwatch.stop)
 
         # test starting
         self.stopwatch.start()
         self.assertTrue(self.stopwatch.isstarted(), 'Clock not showing started')
 
         # test starting already started clock
-        self.assertRaises(StopWatchException, self.stopwatch.start(),
-                          'Clock did not throw error when starting started clock')
+        self.assertRaises(StopWatchException, self.stopwatch.start)
 
         # test stopping clock
         self.stopwatch.stop()
