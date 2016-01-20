@@ -209,6 +209,31 @@ class StopWatch(object):
                 return _usedclocks.append(_clock)
         return _usedclocks
 
+    def reinitialize(self):
+        """
+        Returns stopwatch to original state where only a default clock exists
+        :return:
+        """
+        # ensure default clock exists, if so reset it otherwise add it back
+        if 'default' in self._clocks:
+            self.reset()
+        else:
+            self.addclock('default', 'Default')
+        # remove all other clocks
+        for clock in [x for x in self._clocks if x != 'default']:
+            self.removeclock(clock)
+
+    def removeclock(self, _clockname):
+        """
+        Removes the clock designated by clock name.  Throws error if trying to delete last clock
+        :param _clockname:
+        :return:
+        """
+        if len(self._clocks) > 1:
+            del self._clocks[_clockname]
+        else:
+            raise StopWatchException('Not allowed to remove last clock')
+
     @staticmethod
     def __humanreadabletime(_secs):
         _days = _hrs = _mins = 0.0
