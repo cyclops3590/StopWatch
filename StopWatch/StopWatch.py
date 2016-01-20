@@ -118,7 +118,8 @@ class StopWatch(object):
         """
         _stop = time.time()
         for _clock in self._clocks:
-            self.stop(_clock, overrideend=_stop)
+            if self.isstarted(_clock):
+                self.stop(_clock, overrideend=_stop)
 
     def reset(self, _clockname='default'):
         """Resets the StopWatch like it was never used
@@ -155,11 +156,7 @@ class StopWatch(object):
         :return: clocks running
         :rtype: list
         """
-        _startedclocks = []
-        for _clock in self._clocks:
-            if self.isstarted(_clock):
-                _startedclocks.append(_clock)
-        return _startedclocks
+        return [_clock for _clock in self._clocks if self.isstarted(_clock)]
 
     def stoppedclocks(self):
         """
@@ -167,11 +164,7 @@ class StopWatch(object):
         :return: clocks stopped
         :rtype: list
         """
-        _stoppedclocks = []
-        for _clock in self._clocks:
-            if self.isstopped(_clock):
-                _stoppedclocks.append(_clock)
-        return _stoppedclocks
+        return [_clock for _clock in self._clocks if self.isstopped(_clock)]
 
     def isstopped(self, _clockname='default'):
         """Determines if StopWatch is started and not stopped
@@ -199,15 +192,18 @@ class StopWatch(object):
             return True
         return False
 
+    def availableclocks(self):
+        """
+        Provides list of all clocks currently existing in stopwatch
+        :return:
+        """
+        return self._clocks.keys()
+
     def usedclocks(self):
         """
         gets clocks that are currently in use
         """
-        _usedclocks = []
-        for _clock in self._clocks:
-            if self.everused(_clock):
-                return _usedclocks.append(_clock)
-        return _usedclocks
+        return [_clock for _clock in self._clocks if self.everused(_clock)]
 
     def reinitialize(self):
         """
