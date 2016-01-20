@@ -6,6 +6,7 @@ This class simplifies the interactions needed to determine the time code chunks 
 import time
 from StopWatchException import StopWatchException
 
+
 class StopWatch(object):
     """
     Class definition for StopWatch which is a class to simply perform start, stop and print duration strings.
@@ -13,7 +14,7 @@ class StopWatch(object):
     stopwatch functionality
     """
 
-    def __init__(self, _swtitle='StopWatch Default',_defaulttitle='default',_defaultname='default'):
+    def __init__(self, _swtitle='StopWatch Default', _defaulttitle='default', _defaultname='default'):
         """
         initialize StopWatch object instance
         :param _swtitle: Title for the stop watch
@@ -122,7 +123,7 @@ class StopWatch(object):
         if self.isstarted(_clockname):
             self._clocks[_clockname]['end'] = _end
             self._clocks[_clockname]['total'] += \
-                int(self._clocks[_clockname]['end'] - self._clocks[_clockname]['begin'])
+                int(self._clocks[_clockname].get('end')) - int(self._clocks[_clockname].get('begin'))
             self._clocks[_clockname]['laps'] += 1
         else:
             raise StopWatchException('StopWatch is already stopped.  It must be started first.')
@@ -279,6 +280,7 @@ class StopWatch(object):
     def get_clock_summary(self, onlytime=False, _clockname=None, printlaps=True):
         """
         Retrieves the duration seen from start to _end.  Prepends a custom label if provided
+        :param printlaps:
         :param onlytime: only return time portion
         :type onlytime: bool
         :param _clockname: name of clock
@@ -300,7 +302,7 @@ class StopWatch(object):
                 _msg = '%s: Duration: %s' % \
                        (self._clocks[_clockname]['title'], _timestr)
                 if printlaps:
-                    _msg = '%s in %s lap(s)' % (_msg,self._clocks[_clockname]['laps'])
+                    _msg = '%s in %s lap(s)' % (_msg, self._clocks[_clockname]['laps'])
         return _msg
 
     @property
@@ -320,23 +322,39 @@ class StopWatch(object):
         _msg += 'Total Duration: %s' % self.__humanreadabletime(_total)
         return _msg
 
-def timeit(logger=None,level='debug'):
+
+def timeit(logger=None, level='debug'):
     """
     decorator to time a function in general.  Takes optional logging module instance and logging level
     None means print to stdout
-    :param func:
+    :param level:
+    :param logger:
     :return:
     """
     def decorator(func):
-        def wrapper(*args,**kwargs):
-            _sw = StopWatch(_defaultname='decorator',_defaulttitle=func.__name__)
+        """
+
+        :param func:
+        :return:
+        """
+
+        def wrapper(*args, **kwargs):
+            """
+
+            :param args:
+            :param kwargs:
+            :return:
+            """
+            _sw = StopWatch(_defaultname='decorator', _defaulttitle=func.__name__)
             _sw.start()
-            _output = func(*args,**kwargs)
+            _output = func(*args, **kwargs)
             _sw.stop()
             if logger:
-                getattr(logger,level.lower())(_sw.get_clock_summary(_clockname='decorator',printlaps=False))
+                getattr(logger, level.lower())(_sw.get_clock_summary(_clockname='decorator', printlaps=False))
             else:
-                print(_sw.get_clock_summary(_clockname='decorator',printlaps=False))
+                print(_sw.get_clock_summary(_clockname='decorator', printlaps=False))
             return _output
+
         return wrapper
+
     return decorator

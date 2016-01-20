@@ -93,7 +93,5 @@ class StopWatchTester(unittest2.TestCase):
         self.assertRaises(StopWatchException, self.stopwatch.removeclock, 'default')
 
 
-
-
 if __name__ == '__main__':
     unittest2.main()
