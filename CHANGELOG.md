@@ -1,3 +1,14 @@
+<a name="0.4.0"></a>
+# [0.4.0](//compare/0.3.0...v0.4.0) (2016-01-21)
+
+
+### Features
+
+* finalize pypi ability a95d064
+* make default clock more dynamic.  add decorator to time a function 3a5cc05
+
+
+
 <a name="0.3.0"></a>
 # 0.3.0 (2016-01-20)
 
