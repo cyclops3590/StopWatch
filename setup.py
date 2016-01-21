@@ -3,11 +3,15 @@
 setup file
 """
 import os
-from distutils.core import setup
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 localdir = os.path.dirname(os.path.abspath(__file__))
 name = 'stopwatch-multiclock'
-pkg = __import__('stopwatch')
+pkg = __import__('StopWatch')
 
 author, email = pkg.__author__.rsplit(' ', 1)
 email = email.strip('<>')
@@ -18,19 +22,33 @@ readme = open(os.path.join(localdir, 'README.md'), 'r').readlines()
 description = readme[5]
 long_description = ''.join(readme)
 
-try:
-    test_reqs = open(os.path.join(os.path.dirname(__file__), 'test_requirements.txt')).read()
-except (IOError, OSError):
-    test_reqs = reqs = ''
-
-
 setup(
         name='StopWatch',
         version='0.3.0',
         packages=['tests', 'StopWatch'],
         url='https://github.com/cyclops3590/StopWatch',
-        license='None',
+        download_url='https://github.com/cyclops3590/StopWatch',
+        license='BSD',
         author='cyclops',
         author_email='cyclops3590@gmail.com',
-        description='Multiclock Stopwatch', requires=['unittest2']
+        description='Multiclock Stopwatch',
+        requires=['unittest2'],
+        keywords=['stopwatch', 'multi-clock'],
+        classifiers=[
+            'Development Status :: 4 - Beta',
+            'Intended Audience :: Developers',
+            'License :: OSI Approved :: BSD License',
+            'Natural Language :: English',
+            'Topic :: Scientific/Engineering :: Bio-Informatics',
+            "Programming Language :: Python :: 2",
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.5',
+            'Operating System :: OS Independent'
+        ],
+        zip_safe=True,
+        platforms=['MacOS', 'POSIX'],
+        maintainer='cyclops',
+        maintainer_email='cyclops3590@gmail.com',
+        provides=['StopWatch']
 )
