@@ -4,12 +4,12 @@ Changelog
 %%version%% (unreleased)
 ------------------------
 
+- Converted to gitchangelog for changelog generation. [cyclops]
+
 - More prep for pypi distribution. [cyclops]
 
 0.4.1 (2016-01-21)
 ------------------
-
-- Bump version. [cyclops]
 
 - Use variables where possible. [cyclops]
 
@@ -20,37 +20,37 @@ Changelog
 0.4.0 (2016-01-21)
 ------------------
 
-- Bump version. [cyclops]
-
-- Bump version. [cyclops]
+New
+~~~
 
 - Feat: finalize pypi ability. [cyclops]
+
+- Feat: make default clock more dynamic.  add decorator to time a
+  function. [cyclops]
+
+Changes
+~~~~~~~
 
 - Chore: code compliance fixes. [cyclops]
 
 - Chore: readying for pypi. [cyclops]
 
-- Feat: make default clock more dynamic.  add decorator to time a
-  function. [cyclops]
-
-- Bumping version/changelog. [cyclops]
-
 0.3.0 (2016-01-20)
 ------------------
+
+New
+~~~
+
+- Feat: added tests for multiclock stopwatch. [cyclops]
+
+- Feat: add ability to remove a clock and to reinit the entire
+  stopwatch. [cyclops]
 
 Fix
 ~~~
 
 - Stopping all clocks now works as intended.  optimized other code.
   added function to retrieve available clocks in stopwatch. [cyclops]
-
-Other
-~~~~~
-
-- Feat: added tests for multiclock stopwatch. [cyclops]
-
-- Feat: add ability to remove a clock and to reinit the entire
-  stopwatch. [cyclops]
 
 - Fix changelog. [cyclops]
 
@@ -72,14 +72,20 @@ Other
 0.2.1 (2015-10-14)
 ------------------
 
-- Version bump. [cyclops]
-
 - Doc: added general readme. [cyclops]
 
 - Added changelog. [cyclops]
 
 0.2.0 (2015-10-14)
 ------------------
+
+New
+~~~
+
+- Feat: added initial testing. [cyclops]
+
+- Feat: added ability to have multiple clocks within a single stopwatch.
+  [cyclops]
 
 Fix
 ~~~
@@ -89,14 +95,9 @@ Fix
 Other
 ~~~~~
 
-- Feat: added initial testing. [cyclops]
-
 - Added .gitignore. [cyclops]
 
 - Added more features specific to multiple clocks. [cyclops]
-
-- Feat: added ability to have multiple clocks within a single stopwatch.
-  [cyclops]
 
 0.0.1 (2015-10-14)
 ------------------
