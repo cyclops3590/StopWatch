@@ -1,7 +1,0 @@
-{
-  "name": "stopwatch",
-  "version": "0.4.1",
-  "dependencies": {
-    "unittest2": "^1.1.0"
-  }
-}
