@@ -24,13 +24,13 @@ long_description = ''.join(readme)
 
 setup(
         name='StopWatch',
-        version='0.4.0',
+        version=version,
         packages=['tests', 'StopWatch'],
         url='https://github.com/cyclops3590/StopWatch',
         download_url='https://github.com/cyclops3590/StopWatch',
         license='BSD',
-        author='cyclops',
-        author_email='cyclops3590@gmail.com',
+        author=author,
+        author_email=email,
         description='Multiclock Stopwatch',
         requires=['unittest2'],
         keywords=['stopwatch', 'multi-clock'],
@@ -47,7 +47,7 @@ setup(
         ],
         zip_safe=True,
         platforms=['MacOS', 'POSIX'],
-        maintainer='cyclops',
-        maintainer_email='cyclops3590@gmail.com',
+        maintainer=author,
+        maintainer_email=email,
         provides=['StopWatch']
 )
