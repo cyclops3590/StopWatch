@@ -24,7 +24,7 @@ long_description = ''.join(readme)
 
 setup(
         name='StopWatch',
-        version='0.3.0',
+        version='0.4.0',
         packages=['tests', 'StopWatch'],
         url='https://github.com/cyclops3590/StopWatch',
         download_url='https://github.com/cyclops3590/StopWatch',
