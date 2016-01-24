@@ -18,7 +18,7 @@ email = email.strip('<>')
 
 version = pkg.__version__
 
-readme = open(os.path.join(localdir, 'README.md'), 'r').readlines()
+readme = open(os.path.join(localdir, 'README.rst'), 'r').readlines()
 description = readme[5]
 long_description = ''.join(readme)
 

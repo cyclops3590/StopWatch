@@ -1,8 +1,8 @@
 Changelog
 =========
 
-%%version%% (unreleased)
-------------------------
+0.4.2 (2016-01-22)
+------------------
 
 - Converted to gitchangelog for changelog generation. [cyclops]
 
