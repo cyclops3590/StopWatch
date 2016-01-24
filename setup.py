@@ -10,8 +10,8 @@ except ImportError:
     from distutils.core import setup
 
 localdir = os.path.dirname(os.path.abspath(__file__))
-name = 'stopwatch-multiclock'
-pkg = __import__('StopWatch')
+name = 'pyStopWatch'
+pkg = __import__('pyStopWatch')
 
 author, email = pkg.__author__.rsplit(' ', 1)
 email = email.strip('<>')
@@ -23,9 +23,9 @@ description = readme[5]
 long_description = ''.join(readme)
 
 setup(
-        name='StopWatch',
+        name='pyStopWatch',
         version=version,
-        packages=['tests', 'StopWatch'],
+        packages=['tests', 'pyStopWatch'],
         url='https://github.com/cyclops3590/StopWatch',
         download_url='https://github.com/cyclops3590/StopWatch',
         license='BSD',
@@ -50,5 +50,5 @@ setup(
         platforms=['MacOS', 'POSIX'],
         maintainer=author,
         maintainer_email=email,
-        provides=['StopWatch']
+        provides=['pyStopWatch']
 )

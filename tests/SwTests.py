@@ -4,8 +4,8 @@
 StopWatch Test Definitions
 """
 import unittest2
-from StopWatch.StopWatch import StopWatch
-from StopWatch.StopWatchException import StopWatchException
+from pyStopWatch.StopWatch import StopWatch
+from pyStopWatch.StopWatchException import StopWatchException
 import time
 
 
