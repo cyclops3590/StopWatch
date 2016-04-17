@@ -275,6 +275,8 @@ class StopWatch(object):
             _timestr += '%s minutes ' % _mins
         if _secs > 0:
             _timestr += '%s seconds' % _secs
+        if not _timestr:
+            _timestr = '{0} seconds'.format(_secs)
         return _timestr
 
     def get_clock_summary(self, onlytime=False, _clockname=None, printlaps=True):
@@ -313,12 +315,14 @@ class StopWatch(object):
         """
         _msg = ''
         _total = 0
-        _msg += 'Summary for %s stop watch' % self.title
-        _msg += '%s\n' % '=' * 90
+        _msg += 'Summary for %s stop watch\n' % self.title
+        _msg += '=' * 90
+        _msg += '\n'
         for _clock in self._clocks:
             _msg += '%s\n' % self.get_clock_summary(_clockname=_clock)
             _total += self._clocks[_clock]['total']
-        _msg += '%s\n' % '=' * 90
+        _msg += '=' * 90
+        _msg += '\n'
         _msg += 'Total Duration: %s' % self.__humanreadabletime(_total)
         return _msg
 
