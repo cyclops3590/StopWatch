@@ -268,13 +268,13 @@ class StopWatch(object):
             _days = _hrs // 24.0
             _hrs %= 24.0
         if _days > 0:
-            _timestr += '%s days ' % _days
+            _timestr = '{0}{1} days '.format(_timestr,_days)
         if _hrs > 0:
-            _timestr += '%s hours ' % _hrs
+            _timestr = '{0}{1} hours '.format(_timestr,_hrs)
         if _mins > 0:
-            _timestr += '%s minutes ' % _mins
+            _timestr += '{0}{1} minutes '.format(_timestr,_mins)
         if _secs > 0:
-            _timestr += '%s seconds' % _secs
+            _timestr += '{0}{1} seconds'.format(_timestr,_secs)
         if not _timestr:
             _timestr = '{0} seconds'.format(_secs)
         return _timestr
@@ -293,7 +293,7 @@ class StopWatch(object):
         if not _clockname:
             _clockname = self._defaultname
         if not self.everused(_clockname):
-            _msg = 'StopWatch never used.'
+            _msg = '{0}: StopWatch never used.'.format(self._clocks[_clockname]['title'])
         elif self._clocks[_clockname]['end'] is None:
             raise StopWatchException('StopWatch must be stopped before a duration can be calculated')
         else:
@@ -301,10 +301,9 @@ class StopWatch(object):
             if onlytime:
                 _msg = _timestr
             else:
-                _msg = '%s: Duration: %s' % \
-                       (self._clocks[_clockname]['title'], _timestr)
+                _msg = '{0}: Duration: {1}'.format(self._clocks[_clockname]['title'], _timestr)
                 if printlaps:
-                    _msg = '%s in %s lap(s)' % (_msg, self._clocks[_clockname]['laps'])
+                    _msg = '{0} in {1} lap(s)'.format(_msg, self._clocks[_clockname]['laps'])
         return _msg
 
     @property
@@ -313,17 +312,14 @@ class StopWatch(object):
         Get summary for stopwatch as a whole
         :return: str
         """
-        _msg = ''
         _total = 0
-        _msg += 'Summary for %s stop watch\n' % self.title
-        _msg += '=' * 90
-        _msg += '\n'
+        _msg = 'Summary for {0} stop watch\n'.format(self.title)
+        _msg = '{0}{1}\n'.format(_msg,'='*90)
         for _clock in self._clocks:
-            _msg += '%s\n' % self.get_clock_summary(_clockname=_clock)
+            _msg = '{0}{1}\n'.format(_msg,self.get_clock_summary(_clockname=_clock))
             _total += self._clocks[_clock]['total']
-        _msg += '=' * 90
-        _msg += '\n'
-        _msg += 'Total Duration: %s' % self.__humanreadabletime(_total)
+        _msg = '{0}{1}\n'.format(_msg,'='*90)
+        _msg = '{0}Total Duration: {1}'.format(_msg,self.__humanreadabletime(_total))
         return _msg
 
 
