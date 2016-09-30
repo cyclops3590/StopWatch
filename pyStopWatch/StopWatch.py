@@ -26,14 +26,18 @@ class StopWatch(object):
         self.title = _swtitle
         self._defaulttitle = _defaulttitle
         self._defaultname = _defaultname
-        self._clocks = {
-            self._defaultname: {
-                'title': self._defaulttitle,
+        self._clocks = self.__init_clock(self._defaultname,self._defaulttitle)
+
+    def __init_clock(self,_name,_title):
+        return {
+            _name: {
+                'title': _title,
                 'begin': None,
                 'end': None,
                 'total': 0,
                 'laps': 0,
-                'display': True
+                'display': True,
+                'paused': False
             }
         }
 
@@ -76,14 +80,8 @@ class StopWatch(object):
         :param _clockname: clockname
         :type _clockname: str
         """
-        self._clocks[_clockname] = {
-            'title': _clocktitle,
-            'begin': None,
-            'end': None,
-            'total': 0,
-            'laps': 0,
-            'display': _display
-        }
+        self._clocks.update(self.__init_clock(_clockname,_clocktitle))
+
 
     def start(self, _clockname=None, overridestart=None):
         """
@@ -100,6 +98,8 @@ class StopWatch(object):
         if self.isstopped(_clockname):
             self._clocks[_clockname]['begin'] = _start
             self._clocks[_clockname]['end'] = None
+        elif self.ispaused(_clockname):
+            raise StopWatchException('StopWatch is currently paused')
         else:
             raise StopWatchException('StopWatch is already started')
 
@@ -123,13 +123,69 @@ class StopWatch(object):
         if not _clockname:
             _clockname = self._defaultname
         _end = overrideend or time.time()
-        if self.isstarted(_clockname):
+        if self.ispaused(_clockname):
+            self._clocks[_clockname]['laps'] += 1
+            self._clocks[_clockname]['paused'] = False
+        elif self.isstarted(_clockname):
             self._clocks[_clockname]['end'] = _end
             self._clocks[_clockname]['total'] += \
                 int(self._clocks[_clockname].get('end')) - int(self._clocks[_clockname].get('begin'))
             self._clocks[_clockname]['laps'] += 1
         else:
             raise StopWatchException('StopWatch is already stopped.  It must be started first.')
+
+    def pause(self,_clockname=None,overrideend=None):
+        """
+        Pauses the clock.  This makes it so laps will be more reflective of desired behavior and the time is as desired
+        as well
+        :param _clockname:
+        :return:
+        """
+        if not _clockname:
+            _clockname = self._defaultname
+        _end = overrideend or time.time()
+        if self.ispaused(_clockname):
+            raise StopWatchException('StopWatch clock, {0}, is already paused.  It must be unpaused first.'
+                                     .format(_clockname))
+        elif self.isstarted(_clockname):
+            self._clocks[_clockname]['end'] = _end
+            self._clocks[_clockname]['total'] += \
+                int(self._clocks[_clockname].get('end')) - int(self._clocks[_clockname].get('begin'))
+            self._clocks[_clockname]['paused'] = True
+        else:
+            raise StopWatchException('StopWatch clock, {0}, is already stopped.  It must be started first.'
+                                     .format(_clockname))
+
+    def unpause(self,_clockname=None,overridestart=None):
+        """
+        Unpause a paused clock
+        :param _clockname:
+        :param overridestart:
+        :return:
+        """
+        if not _clockname:
+            _clockname = self._defaultname
+        _start = overridestart or time.time()
+        if self.ispaused(_clockname):
+            self._clocks[_clockname].update({
+                'begin': _start,
+                'end': None,
+                'paused': False
+            })
+        else:
+            raise StopWatchException('StopWatch is not paused')
+
+    def ispaused(self,_clockname=None):
+        """
+        Check if a clock is paused
+        :param _clockname:
+        :return:
+        """
+        if not _clockname:
+            _clockname = self._defaultname
+        if self._clocks[_clockname]['paused']:
+            return True
+        return False
 
     def stopall(self):
         """
@@ -147,8 +203,7 @@ class StopWatch(object):
         """
         if not _clockname:
             _clockname = self._defaultname
-        self._clocks[_clockname]['begin'] = self._clocks[_clockname]['end'] = None
-        self._clocks[_clockname]['total'] = self._clocks[_clockname]['laps'] = 0
+        self._clocks.update(self.__init_clock(_clockname,self._clocks[_clockname]['title']))
 
     def resetall(self):
         """
@@ -188,6 +243,14 @@ class StopWatch(object):
         :rtype: list
         """
         return [_clock for _clock in self._clocks if self.isstopped(_clock)]
+
+    def pausedclocks(self):
+        """
+        Get the clocks currently paused
+        :return: clocks stopped
+        :rtype: list
+        """
+        return [_clock for _clock in self._clocks if self.ispaused(_clock)]
 
     def isstopped(self, _clockname=None):
         """Determines if StopWatch is started and not stopped
@@ -252,10 +315,10 @@ class StopWatch(object):
         :param _clockname:
         :return:
         """
-        if len(self._clocks) > 1:
+        if _clockname in self._clocks:
             del self._clocks[_clockname]
         else:
-            raise StopWatchException('Not allowed to remove last clock')
+            raise StopWatchException('Clock, {0}, does not exist'.format(_clockname))
 
     @staticmethod
     def __humanreadabletime(_secs):
