@@ -32,7 +32,8 @@ class StopWatch(object):
                 'begin': None,
                 'end': None,
                 'total': 0,
-                'laps': 0
+                'laps': 0,
+                'display': True
             }
         }
 
@@ -66,9 +67,10 @@ class StopWatch(object):
             _time += time.time() - self._clocks[_clockname]['begin']
         return _time
 
-    def addclock(self, _clockname, _clocktitle):
+    def addclock(self, _clockname, _clocktitle, _display=False):
         """
         Add a new clock to the stopwatch
+        :param _display:
         :param _clocktitle: title for the clock
         :type _clocktitle: str
         :param _clockname: clockname
@@ -79,7 +81,8 @@ class StopWatch(object):
             'begin': None,
             'end': None,
             'total': 0,
-            'laps': 0
+            'laps': 0,
+            'display': _display
         }
 
     def start(self, _clockname=None, overridestart=None):
@@ -268,20 +271,21 @@ class StopWatch(object):
             _days = _hrs // 24.0
             _hrs %= 24.0
         if _days > 0:
-            _timestr = '{0}{1} days '.format(_timestr,_days)
+            _timestr = '{0}{1} days '.format(_timestr, _days)
         if _hrs > 0:
-            _timestr = '{0}{1} hours '.format(_timestr,_hrs)
+            _timestr = '{0}{1} hours '.format(_timestr, _hrs)
         if _mins > 0:
-            _timestr += '{0}{1} minutes '.format(_timestr,_mins)
+            _timestr += '{0}{1} minutes '.format(_timestr, _mins)
         if _secs > 0:
-            _timestr += '{0}{1} seconds'.format(_timestr,_secs)
+            _timestr += '{0}{1} seconds'.format(_timestr, _secs)
         if not _timestr:
             _timestr = '{0} seconds'.format(_secs)
         return _timestr
 
-    def get_clock_summary(self, onlytime=False, _clockname=None, printlaps=True):
+    def get_clock_summary(self, onlytime=False, _clockname=None, printlaps=True, json=False):
         """
         Retrieves the duration seen from start to _end.  Prepends a custom label if provided
+        :param json:
         :param printlaps:
         :param onlytime: only return time portion
         :type onlytime: bool
@@ -307,19 +311,37 @@ class StopWatch(object):
         return _msg
 
     @property
-    def summary(self):
+    def summary(self, json=False, _displayall=False):
         """
         Get summary for stopwatch as a whole
         :return: str
         """
         _total = 0
-        _msg = 'Summary for {0} stop watch\n'.format(self.title)
-        _msg = '{0}{1}\n'.format(_msg,'='*90)
-        for _clock in self._clocks:
-            _msg = '{0}{1}\n'.format(_msg,self.get_clock_summary(_clockname=_clock))
-            _total += self._clocks[_clock]['total']
-        _msg = '{0}{1}\n'.format(_msg,'='*90)
-        _msg = '{0}Total Duration: {1}'.format(_msg,self.__humanreadabletime(_total))
+        if json:
+            _msg_data = {
+                'Combined': {
+                    'title': self.title,
+                    'total': 0,
+                }
+            }
+            for _clockname in self._clocks:
+                _clock = self._clocks[_clockname]
+                if _displayall or _clock['display']:
+                    _msg_data['Combined']['total'] += _clock['total']
+                    _msg_data[_clockname] = {
+                        'title': _clock['title'],
+                        'total': _clock['total'],
+                        'laps': _clock['laps']
+                    }
+        else:
+            _msg = 'Summary for {0} stop watch\n'.format(self.title)
+            _msg = '{0}{1}\n'.format(_msg, '=' * 90)
+            for _clock in self._clocks:
+                if _displayall or self._clocks[_clock]['display']:
+                    _msg = '{0}{1}\n'.format(_msg, self.get_clock_summary(_clockname=_clock))
+                    _total += self._clocks[_clock]['total']
+            _msg = '{0}{1}\n'.format(_msg, '=' * 90)
+            _msg = '{0}Total Duration: {1}'.format(_msg, self.__humanreadabletime(_total))
         return _msg
 
 
@@ -331,6 +353,7 @@ def timeit(logger=None, level='debug'):
     :param logger:
     :return:
     """
+
     def decorator(func):
         """
 
