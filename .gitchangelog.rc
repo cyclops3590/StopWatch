@@ -15,17 +15,19 @@ section_regexps = [
     ('New', [
 	r'^[nN]ew\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
 	r'^[Ff]eat:',
+	r'^[Ee]nh:',
      ]),
     ('Changes', [
         r'^[cC]hg\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
         r'^[Cc]hore:',
      ]),
     ('Fix', [
-        r'^[fF]ix\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
+        r'^[fF]ix\s*:\s*((search|dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
         r'^[Ff]ix\s',
      ]),
 
-    ('Other', None ## Match all lines
-     ),
-
 ]
+
+subject_process = (strip |
+    ReSub(r'^([cC]hg|[fF]ix|[nN]ew|[fF]eat|[cC]hore|[eE]nh)\s*:\s*((ui|search|infra|test|doc|redis)\s*:\s*)?([^\n@]*)(@[a-z]+\s+)*$', r'\4') |
+    ucfirst | final_dot)
