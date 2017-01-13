@@ -69,7 +69,7 @@ class StopWatch(object):
         _time = self._clocks[_clockname]['total']
         if self.isstarted(_clockname):
             _time += (datetime.utcnow() - self._clocks[_clockname]['begin']).total_seconds()
-        return _time
+        return float(_time)
 
     def addclock(self, _clockname, _clocktitle, _display=True):
         """
@@ -149,7 +149,7 @@ class StopWatch(object):
         elif self.isstarted(_clockname):
             self._clocks[_clockname]['end'] = _end
             self._clocks[_clockname]['total'] += \
-                int(self._clocks[_clockname].get('end')) - int(self._clocks[_clockname].get('begin'))
+                (self._clocks[_clockname].get('end') - self._clocks[_clockname].get('begin')).total_seconds()
             self._clocks[_clockname]['paused'] = True
         else:
             raise StopWatchException('StopWatch clock, {0}, is already stopped.  It must be started first.'
