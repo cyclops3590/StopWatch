@@ -3,7 +3,7 @@
 This class simplifies the interactions needed to determine the time code chunks take to operate.
 """
 
-import time
+from datetime import datetime
 from StopWatchException import StopWatchException
 
 
@@ -28,15 +28,15 @@ class StopWatch(object):
         self._defaultname = _defaultname
         self._clocks = self.__init_clock(self._defaultname,self._defaulttitle)
 
-    def __init_clock(self,_name,_title):
+    def __init_clock(self,_name,_title,_display=True):
         return {
             _name: {
                 'title': _title,
                 'begin': None,
                 'end': None,
-                'total': 0,
+                'total': 0.0,
                 'laps': 0,
-                'display': True,
+                'display': _display,
                 'paused': False
             }
         }
@@ -68,10 +68,10 @@ class StopWatch(object):
             _clockname = self._defaultname
         _time = self._clocks[_clockname]['total']
         if self.isstarted(_clockname):
-            _time += time.time() - self._clocks[_clockname]['begin']
+            _time += (datetime.utcnow() - self._clocks[_clockname]['begin']).total_seconds()
         return _time
 
-    def addclock(self, _clockname, _clocktitle, _display=False):
+    def addclock(self, _clockname, _clocktitle, _display=True):
         """
         Add a new clock to the stopwatch
         :param _display:
@@ -80,7 +80,7 @@ class StopWatch(object):
         :param _clockname: clockname
         :type _clockname: str
         """
-        self._clocks.update(self.__init_clock(_clockname,_clocktitle))
+        self._clocks.update(self.__init_clock(_clockname,_clocktitle,_display))
 
 
     def start(self, _clockname=None, overridestart=None):
@@ -88,13 +88,13 @@ class StopWatch(object):
         Sets the start time
         As object can be reused, sets _end to None to ensure _end can't be before _begin
         :param overridestart: override the starttime if needbe
-        :type overridestart: time.time()
+        :type overridestart: datetime.utcnow()
         :param _clockname: clock name to start
         :type _clockname: str
         """
         if not _clockname:
             _clockname = self._defaultname
-        _start = overridestart or time.time()
+        _start = overridestart or datetime.utcnow()
         if self.isstopped(_clockname):
             self._clocks[_clockname]['begin'] = _start
             self._clocks[_clockname]['end'] = None
@@ -107,7 +107,7 @@ class StopWatch(object):
         """
         Start all clocks at same time
         """
-        _start = time.time()
+        _start = datetime.utcnow()
         for _clock in self._clocks:
             self.start(_clock, overridestart=_start)
 
@@ -116,20 +116,19 @@ class StopWatch(object):
         Sets the _end time and adds the difference between start and _end to the _total time so can have
         a running _total time (looping but only want to see how much part of the loop takes over all iterations)
         :param overrideend: overrid the end time if needbe
-        :type overrideend: time.time()
+        :type overrideend: datetime.utcnow()
         :param _clockname: clock name to start
         :type _clockname: str
         """
         if not _clockname:
             _clockname = self._defaultname
-        _end = overrideend or time.time()
+        _end = overrideend or datetime.utcnow()
         if self.ispaused(_clockname):
             self._clocks[_clockname]['laps'] += 1
             self._clocks[_clockname]['paused'] = False
         elif self.isstarted(_clockname):
             self._clocks[_clockname]['end'] = _end
-            self._clocks[_clockname]['total'] += \
-                int(self._clocks[_clockname].get('end')) - int(self._clocks[_clockname].get('begin'))
+            self._clocks[_clockname]['total'] += (self._clocks[_clockname].get('end') - self._clocks[_clockname].get('begin')).total_seconds()
             self._clocks[_clockname]['laps'] += 1
         else:
             raise StopWatchException('StopWatch is already stopped.  It must be started first.')
@@ -143,7 +142,7 @@ class StopWatch(object):
         """
         if not _clockname:
             _clockname = self._defaultname
-        _end = overrideend or time.time()
+        _end = overrideend or datetime.utcnow()
         if self.ispaused(_clockname):
             raise StopWatchException('StopWatch clock, {0}, is already paused.  It must be unpaused first.'
                                      .format(_clockname))
@@ -165,7 +164,7 @@ class StopWatch(object):
         """
         if not _clockname:
             _clockname = self._defaultname
-        _start = overridestart or time.time()
+        _start = overridestart or datetime.utcnow()
         if self.ispaused(_clockname):
             self._clocks[_clockname].update({
                 'begin': _start,
@@ -191,7 +190,7 @@ class StopWatch(object):
         """
         Stop all clocks at same time
         """
-        _stop = time.time()
+        _stop = datetime.utcnow()
         for _clock in self._clocks:
             if self.isstarted(_clock):
                 self.stop(_clock, overrideend=_stop)
@@ -340,9 +339,9 @@ class StopWatch(object):
         if _mins > 0:
             _timestr += '{0}{1} minutes '.format(_timestr, _mins)
         if _secs > 0:
-            _timestr += '{0}{1} seconds'.format(_timestr, _secs)
+            _timestr += '{0}{1:f} seconds'.format(_timestr, _secs)
         if not _timestr:
-            _timestr = '{0} seconds'.format(_secs)
+            _timestr = '{0:f} seconds'.format(_secs)
         return _timestr
 
     def get_clock_summary(self, onlytime=False, _clockname=None, printlaps=True, json=False):
@@ -399,10 +398,19 @@ class StopWatch(object):
         else:
             _msg = 'Summary for {0} stop watch\n'.format(self.title)
             _msg = '{0}{1}\n'.format(_msg, '=' * 90)
+            hiddencount = 0
+            hiddentime = 0.0
+            hiddenlaps = 0
             for _clock in self._clocks:
                 if _displayall or self._clocks[_clock]['display']:
                     _msg = '{0}{1}\n'.format(_msg, self.get_clock_summary(_clockname=_clock))
-                    _total += self._clocks[_clock]['total']
+                else:
+                    hiddencount += 1
+                    hiddentime += self.clocktotalsecs(_clock)
+                    hiddenlaps += self.clocklapcount(_clock)
+                _total += self._clocks[_clock]['total']
+            if hiddencount > 0:
+                _msg = '{0}{4}\n{1} Hidden Clock(s): {2:f} seconds in {3} lap(s)\n'.format(_msg,hiddencount,hiddentime,hiddenlaps,'-'*90)
             _msg = '{0}{1}\n'.format(_msg, '=' * 90)
             _msg = '{0}Total Duration: {1}'.format(_msg, self.__humanreadabletime(_total))
         return _msg

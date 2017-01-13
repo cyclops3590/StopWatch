@@ -90,7 +90,7 @@ class StopWatchTester(unittest2.TestCase):
         self.stopwatch.reinitialize()
         self.assertEqual(len(self.stopwatch.availableclocks()), 1, 'Incorrect available clock count, should be 1.')
 
-        self.assertRaises(StopWatchException, self.stopwatch.removeclock, 'default')
+        self.assertRaises(StopWatchException, self.stopwatch.removeclock, 'bogus')
 
 
 if __name__ == '__main__':
