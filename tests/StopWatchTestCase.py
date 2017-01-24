@@ -3,21 +3,23 @@
 """
 StopWatch Test Definitions
 """
-import unittest2
+import unittest
 from pyStopWatch.StopWatch import StopWatch
 from pyStopWatch.StopWatchException import StopWatchException
 import time
 
 
-class StopWatchTester(unittest2.TestCase):
+class StopWatchTestCase(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.stopwatch = StopWatch()
+
     def setUp(self):
-        self.stopwatch = StopWatch()
-
-    def testSingleClock(self):
-        # deals with default clock only so clock name is not to be given
-
-        # put stopwatch back to state before any previous tests
         self.stopwatch.reinitialize()
+
+    def test_SingleClock(self):
+        # deals with default clock only so clock name is not to be given
 
         # test trying to stop an an unstarted clock
         self.assertRaises(StopWatchException, self.stopwatch.stop)
@@ -50,11 +52,8 @@ class StopWatchTester(unittest2.TestCase):
         self.stopwatch.reset()
         self.assertFalse(self.stopwatch.everused(), 'Clock shows being used after reset')
 
-    def testMultiClock(self):
+    def test_MultiClock(self):
         # deals with testing 2 clocks in addition to the default clock
-
-        # put stopwatch back to state before any previous tests
-        self.stopwatch.reinitialize()
 
         # testing adding new clock
         self.assertEqual(len(self.stopwatch.availableclocks()), 1, 'Incorrect available clock count, should be 1.')
@@ -91,7 +90,3 @@ class StopWatchTester(unittest2.TestCase):
         self.assertEqual(len(self.stopwatch.availableclocks()), 1, 'Incorrect available clock count, should be 1.')
 
         self.assertRaises(StopWatchException, self.stopwatch.removeclock, 'bogus')
-
-
-if __name__ == '__main__':
-    unittest2.main()
