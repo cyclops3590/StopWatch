@@ -1,6 +1,6 @@
-========================
+=======================
 StopWatch - Multi-clock
-========================
+=======================
 
 
 StopWatch is meant to provide an easy interface to stopwatch like functionality within code.  However, instead of a single clock, it can do multiple clocks, each with their own label/title and properties.
@@ -9,7 +9,7 @@ This was meant to help keep track of how long parts of code execute.  Because th
 
 
 Feature Summary
------------------
+---------------
 
 1. Multiple clocks within one stopwatch
 2. Multiple laps allowed per clock
@@ -18,7 +18,7 @@ Feature Summary
 5. Decorator to time individual functions (and log to specified destination)
 
 Installing
-------------
+----------
 
 From the command line::
 
@@ -29,7 +29,7 @@ If StopWatch is already installed, you can upgrade to the latest version with::
     pip install --upgrade StopWatch
 
 Usage
--------
+-----
 
 StopWatch (all commands demo'ed)::
 

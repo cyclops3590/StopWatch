@@ -17,9 +17,9 @@ import time
 
 sw = StopWatch()
 
-sw.addclock('clock1','Clock One')
-sw.addclock('clock2','Clock Two',False)
-sw.addclock('clock3','Clock Three')
+sw.addclock('clock1', 'Clock One')
+sw.addclock('clock2', 'Clock Two', False)
+sw.addclock('clock3', 'Clock Three')
 
 sw.start()
 time.sleep(1)
