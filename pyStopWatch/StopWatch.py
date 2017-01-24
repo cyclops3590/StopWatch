@@ -4,7 +4,7 @@ This class simplifies the interactions needed to determine the time code chunks 
 """
 
 from datetime import datetime
-from StopWatchException import StopWatchException
+from .StopWatchException import StopWatchException
 
 
 class StopWatch(object):
@@ -26,9 +26,9 @@ class StopWatch(object):
         self.title = _swtitle
         self._defaulttitle = _defaulttitle
         self._defaultname = _defaultname
-        self._clocks = self.__init_clock(self._defaultname,self._defaulttitle)
+        self._clocks = self.__init_clock(self._defaultname, self._defaulttitle)
 
-    def __init_clock(self,_name,_title,_display=True):
+    def __init_clock(self, _name, _title, _display=True):
         return {
             _name: {
                 'title': _title,
@@ -80,8 +80,7 @@ class StopWatch(object):
         :param _clockname: clockname
         :type _clockname: str
         """
-        self._clocks.update(self.__init_clock(_clockname,_clocktitle,_display))
-
+        self._clocks.update(self.__init_clock(_clockname, _clocktitle, _display))
 
     def start(self, _clockname=None, overridestart=None):
         """
@@ -128,15 +127,17 @@ class StopWatch(object):
             self._clocks[_clockname]['paused'] = False
         elif self.isstarted(_clockname):
             self._clocks[_clockname]['end'] = _end
-            self._clocks[_clockname]['total'] += (self._clocks[_clockname].get('end') - self._clocks[_clockname].get('begin')).total_seconds()
+            self._clocks[_clockname]['total'] += (
+                self._clocks[_clockname].get('end') - self._clocks[_clockname].get('begin')).total_seconds()
             self._clocks[_clockname]['laps'] += 1
         else:
             raise StopWatchException('StopWatch is already stopped.  It must be started first.')
 
-    def pause(self,_clockname=None,overrideend=None):
+    def pause(self, _clockname=None, overrideend=None):
         """
         Pauses the clock.  This makes it so laps will be more reflective of desired behavior and the time is as desired
         as well
+        :param overrideend:
         :param _clockname:
         :return:
         """
@@ -155,7 +156,7 @@ class StopWatch(object):
             raise StopWatchException('StopWatch clock, {0}, is already stopped.  It must be started first.'
                                      .format(_clockname))
 
-    def unpause(self,_clockname=None,overridestart=None):
+    def unpause(self, _clockname=None, overridestart=None):
         """
         Unpause a paused clock
         :param _clockname:
@@ -174,7 +175,7 @@ class StopWatch(object):
         else:
             raise StopWatchException('StopWatch is not paused')
 
-    def ispaused(self,_clockname=None):
+    def ispaused(self, _clockname=None):
         """
         Check if a clock is paused
         :param _clockname:
@@ -202,7 +203,7 @@ class StopWatch(object):
         """
         if not _clockname:
             _clockname = self._defaultname
-        self._clocks.update(self.__init_clock(_clockname,self._clocks[_clockname]['title']))
+        self._clocks.update(self.__init_clock(_clockname, self._clocks[_clockname]['title']))
 
     def resetall(self):
         """
@@ -333,13 +334,13 @@ class StopWatch(object):
             _days = _hrs // 24.0
             _hrs %= 24.0
         if _days > 0:
-            _timestr = '{0}{1} days '.format(_timestr, _days)
+            _timestr = '{0}{1} days '.format(_timestr, int(_days))
         if _hrs > 0:
-            _timestr = '{0}{1} hours '.format(_timestr, _hrs)
+            _timestr = '{0}{1} hours '.format(_timestr, int(_hrs))
         if _mins > 0:
-            _timestr += '{0}{1} minutes '.format(_timestr, _mins)
+            _timestr = '{0}{1} minutes '.format(_timestr, int(_mins))
         if _secs > 0:
-            _timestr += '{0}{1:f} seconds'.format(_timestr, _secs)
+            _timestr = '{0}{1} seconds'.format(_timestr, '{0:f}'.format(_secs))
         if not _timestr:
             _timestr = '{0:f} seconds'.format(_secs)
         return _timestr
@@ -410,7 +411,9 @@ class StopWatch(object):
                     hiddenlaps += self.clocklapcount(_clock)
                 _total += self._clocks[_clock]['total']
             if hiddencount > 0:
-                _msg = '{0}{4}\n{1} Hidden Clock(s): {2:f} seconds in {3} lap(s)\n'.format(_msg,hiddencount,hiddentime,hiddenlaps,'-'*90)
+                _msg = '{0}{4}\n{1} Hidden Clock(s): {2:f} seconds in {3} lap(s)\n'.format(_msg, hiddencount,
+                                                                                           hiddentime, hiddenlaps,
+                                                                                           '-' * 90)
             _msg = '{0}{1}\n'.format(_msg, '=' * 90)
             _msg = '{0}Total Duration: {1}'.format(_msg, self.__humanreadabletime(_total))
         return _msg
