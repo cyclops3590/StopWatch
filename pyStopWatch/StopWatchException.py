@@ -9,3 +9,10 @@ class StopWatchException(Exception):
     Base StopWatch Exception
     """
     pass
+
+
+class StopWatchLapException(Exception):
+    """
+    Base StopWatch Exception
+    """
+    pass

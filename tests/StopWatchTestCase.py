@@ -3,21 +3,62 @@
 """
 StopWatch Test Definitions
 """
-import unittest2
+import unittest
 from pyStopWatch.StopWatch import StopWatch
 from pyStopWatch.StopWatchException import StopWatchException
 import time
 
 
-class StopWatchTester(unittest2.TestCase):
+class StopWatchTestCase(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.stopwatch = StopWatch(_recordlapdetail=True)
+
     def setUp(self):
-        self.stopwatch = StopWatch()
-
-    def testSingleClock(self):
-        # deals with default clock only so clock name is not to be given
-
-        # put stopwatch back to state before any previous tests
         self.stopwatch.reinitialize()
+
+
+    def test_Pause(self):
+        self.stopwatch.start()
+        time.sleep(1)
+        self.stopwatch.pause()
+        time.sleep(1)
+        self.stopwatch.unpause()
+        time.sleep(1)
+        self.stopwatch.pause()
+        time.sleep(1)
+        self.stopwatch.unpause()
+        time.sleep(1)
+        self.stopwatch.pause()
+        time.sleep(1)
+        self.stopwatch.stop()
+        print(self.stopwatch.get_clock_detail())
+        self.assertEqual(int(self.stopwatch.clocktotalsecs()),3,'Incorrect total time: {0}'.format(self.stopwatch.clocktotalsecs()))
+
+
+    def test_LapDetail(self):
+        self.stopwatch.start()
+        time.sleep(1)
+        self.stopwatch.stop()
+        time.sleep(1)
+        self.stopwatch.start()
+        time.sleep(1)
+        self.stopwatch.pause()
+        time.sleep(1)
+        self.stopwatch.unpause()
+        time.sleep(1)
+        self.stopwatch.pause()
+        time.sleep(1)
+        self.stopwatch.stop()
+        self.assertEqual(int(self.stopwatch.clocktotalsecs()),3,'Incorrect total time: {0}'.format(self.stopwatch.clocktotalsecs()))
+        self.assertEqual(int(self.stopwatch.lapdetail(1)['total']), 1, 'Incorrect lap 1 time: {0}'.format(self.stopwatch.lapdetail(1)['total']))
+        self.assertEqual(int(self.stopwatch.lapdetail(2)['total']), 2, 'Incorrect lap 2 time: {0}'.format(self.stopwatch.lapdetail(1)['total']))
+        self.assertRaises(StopWatchException,self.stopwatch.lapdetail,3)
+
+
+    def test_SingleClock(self):
+        # deals with default clock only so clock name is not to be given
 
         # test trying to stop an an unstarted clock
         self.assertRaises(StopWatchException, self.stopwatch.stop)
@@ -50,11 +91,8 @@ class StopWatchTester(unittest2.TestCase):
         self.stopwatch.reset()
         self.assertFalse(self.stopwatch.everused(), 'Clock shows being used after reset')
 
-    def testMultiClock(self):
+    def test_MultiClock(self):
         # deals with testing 2 clocks in addition to the default clock
-
-        # put stopwatch back to state before any previous tests
-        self.stopwatch.reinitialize()
 
         # testing adding new clock
         self.assertEqual(len(self.stopwatch.availableclocks()), 1, 'Incorrect available clock count, should be 1.')
@@ -90,8 +128,4 @@ class StopWatchTester(unittest2.TestCase):
         self.stopwatch.reinitialize()
         self.assertEqual(len(self.stopwatch.availableclocks()), 1, 'Incorrect available clock count, should be 1.')
 
-        self.assertRaises(StopWatchException, self.stopwatch.removeclock, 'default')
-
-
-if __name__ == '__main__':
-    unittest2.main()
+        self.assertRaises(StopWatchException, self.stopwatch.removeclock, 'bogus')
