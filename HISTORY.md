@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.9.0 (2018-04-02)
+
+### New
+
+* Allow for default clock to be considered the overall time for summary (#8) [cyclops3590]
+
+### Changes
+
+* Get everything up to date (#7) [cyclops3590]
+
+  * No timestring was returnged if 0 seconds.
+  * Summary strings had new line in bad place
+  * Convert strings with variables to new format style
+  * Summary wasn't printing as expected.
+  * Added overall timing to summary.
+  * Added json format for output
+  * Add ability to pause a clock
+  * Changed to datetime to provide far greater precision
+  * Pausing wasn't updated for using datetime
+  * Retrieving clock seconds was still in scientific format for some numbers
+  * Add Python 3.x compatibility
+  * Switched to unittest
+  * Add detail on a per lap basis
+  * Add travis CI integration for testing
+
+
 ## 0.4.5 (2017-01-24)
 
 ### New
@@ -85,5 +111,4 @@
 ### Fix
 
 * Various small bugs/format issues. [cyclops]
-
 
