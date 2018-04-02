@@ -19,41 +19,61 @@ class StopWatchTestCase(unittest.TestCase):
         self.stopwatch.reinitialize()
 
 
-    def test_Pause(self):
+    def __run_clocks(self,multi=False,with_hidden=False):
+        """
+        Runs clocks depending on which ones are desired for test
+        :param multi:
+        :param with_hidden:
+        :return:
+        """
+        if multi:
+            self.stopwatch.addclock('clock2', 'Clock 2')
+        if with_hidden:
+            self.stopwatch.addclock('clock3', 'Hidden Clock', False)
+
+        # Lap 1
         self.stopwatch.start()
+        if multi: self.stopwatch.start('clock2')
+        if with_hidden: self.stopwatch.start('clock3')
+        time.sleep(1)
+        self.stopwatch.stop()
+        if multi: self.stopwatch.stop('clock2')
+        if with_hidden: self.stopwatch.stop('clock3')
+
+        # Lap 2
+        self.stopwatch.start()
+        if multi: self.stopwatch.start('clock2')
+        if with_hidden: self.stopwatch.start('clock3')
         time.sleep(1)
         self.stopwatch.pause()
+        if multi: self.stopwatch.pause('clock2')
         time.sleep(1)
         self.stopwatch.unpause()
+        if multi: self.stopwatch.unpause('clock2')
         time.sleep(1)
         self.stopwatch.pause()
+        if multi: self.stopwatch.pause('clock2')
+        if with_hidden: self.stopwatch.pause('clock3')
         time.sleep(1)
         self.stopwatch.unpause()
+        if multi: self.stopwatch.unpause('clock2')
         time.sleep(1)
         self.stopwatch.pause()
         time.sleep(1)
         self.stopwatch.stop()
-        print(self.stopwatch.get_clock_detail())
-        self.assertEqual(int(self.stopwatch.clocktotalsecs()),3,'Incorrect total time: {0}'.format(self.stopwatch.clocktotalsecs()))
+        if multi: self.stopwatch.stop('clock2')
+        if with_hidden: self.stopwatch.stop('clock3')
+
+    def test_Pause(self):
+        self.__run_clocks()
+        self.assertEqual(int(self.stopwatch.clocktotalsecs()),4,'Incorrect total time: {0}'.format(self.stopwatch.clocktotalsecs()))
 
 
     def test_LapDetail(self):
-        self.stopwatch.start()
-        time.sleep(1)
-        self.stopwatch.stop()
-        time.sleep(1)
-        self.stopwatch.start()
-        time.sleep(1)
-        self.stopwatch.pause()
-        time.sleep(1)
-        self.stopwatch.unpause()
-        time.sleep(1)
-        self.stopwatch.pause()
-        time.sleep(1)
-        self.stopwatch.stop()
-        self.assertEqual(int(self.stopwatch.clocktotalsecs()),3,'Incorrect total time: {0}'.format(self.stopwatch.clocktotalsecs()))
+        self.__run_clocks()
+        self.assertEqual(int(self.stopwatch.clocktotalsecs()),4,'Incorrect total time: {0}'.format(int(self.stopwatch.clocktotalsecs())))
         self.assertEqual(int(self.stopwatch.lapdetail(1)['total']), 1, 'Incorrect lap 1 time: {0}'.format(self.stopwatch.lapdetail(1)['total']))
-        self.assertEqual(int(self.stopwatch.lapdetail(2)['total']), 2, 'Incorrect lap 2 time: {0}'.format(self.stopwatch.lapdetail(1)['total']))
+        self.assertEqual(int(self.stopwatch.lapdetail(2)['total']), 3, 'Incorrect lap 2 time: {0}'.format(self.stopwatch.lapdetail(2)['total']))
         self.assertRaises(StopWatchException,self.stopwatch.lapdetail,3)
 
 
@@ -129,3 +149,21 @@ class StopWatchTestCase(unittest.TestCase):
         self.assertEqual(len(self.stopwatch.availableclocks()), 1, 'Incorrect available clock count, should be 1.')
 
         self.assertRaises(StopWatchException, self.stopwatch.removeclock, 'bogus')
+
+
+    def test_DefaultIsOverall(self):
+        self.__run_clocks(multi=True)
+        summary = self.stopwatch.get_summary(json=True,default_is_overall=True)
+        self.assertEqual(self.stopwatch.clocktotalsecs('default'),summary['Overall']['total'],'Overall does not match default')
+        self.assertEqual(self.stopwatch.clocktotalsecs('default')+self.stopwatch.clocktotalsecs('clock2'), summary['Combined']['total'],'Combined does not match default + clock2')
+
+    def test_DefaultIsNotOverall(self):
+        self.__run_clocks(multi=True)
+        summary = self.stopwatch.get_summary(json=True,default_is_overall=False)
+        self.assertEqual(self.stopwatch.clocktotalsecs('default')+self.stopwatch.clocktotalsecs('clock2'),summary['Overall']['total'],'Overall does not match default + clock2')
+        self.assertEqual(self.stopwatch.clocktotalsecs('default')+self.stopwatch.clocktotalsecs('clock2'), summary['Combined']['total'],'Combined does not match default + clock2')
+
+    def test_Hidden(self):
+        self.__run_clocks(with_hidden=True)
+        summary = self.stopwatch.get_summary(json=True)
+        self.assertEqual(self.stopwatch.clocktotalsecs('default')+summary['Hidden']['total'],summary['Combined']['total'], 'Combined does not match default + hidden')

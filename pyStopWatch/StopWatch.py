@@ -123,7 +123,7 @@ class StopWatch(object):
             _laps += 1
         return _laps
 
-    def clocktotalsecs(self, _clockname=None):
+    def clocktotalsecs(self, _clockname=''):
         """
         Get total time running for a given clock.  Including current lap if running
         :param _clockname: clock name to retrieve lap count
@@ -379,6 +379,7 @@ class StopWatch(object):
     def lapdetail(self,lapnumber,_clockname=None):
         if not _clockname:
             _clockname = self._defaultname
+
         if self._recordlapdetail is False:
             raise StopWatchException('Lap detail not recorded')
         elif lapnumber < 0 or lapnumber > len(self._clocks[_clockname]['lapdetail']):
@@ -486,48 +487,74 @@ class StopWatch(object):
         return _msg
 
     @property
-    def summary(self, json=False, _displayall=False):
+    def summary(self):
+        return self.get_summary()
+
+    def get_summary(self, json=False, _displayall=False,default_is_overall=False):
         """
         Get summary for stopwatch as a whole
         :return: str
         """
-        _total = 0
         if json:
-            _msg_data = {
+            _msg = {
+                'Overall': {
+                  'total': 0,
+                },
                 'Combined': {
-                    'title': self.title,
                     'total': 0,
-                }
+                },
+                'Hidden': {
+                    'title': 'Hidden',
+                    'count': 0,
+                    'total': 0.0,
+                    'laps': 0
+                },
             }
             for _clockname in self._clocks:
                 _clock = self._clocks[_clockname]
+                _msg['Combined']['total'] += self.clocktotalsecs(_clockname)
                 if _displayall or _clock['display']:
-                    _msg_data['Combined']['total'] += _clock['total']
-                    _msg_data[_clockname] = {
+                    if default_is_overall and _clockname == self._defaultname:
+                        _msg['Overall']['total'] = self.clocktotalsecs(_clockname)
+                    elif not default_is_overall:
+                        _msg['Overall']['total'] += self.clocktotalsecs(_clockname)
+                    _msg[_clockname] = {
                         'title': _clock['title'],
-                        'total': _clock['total'],
-                        'laps': _clock['currentlap']
+                        'total': self.clocktotalsecs(_clockname),
+                        'laps': self.clocklapcount(_clockname)
                     }
+                else:
+                    _msg['Hidden']['count'] += 1
+                    _msg['Hidden']['total'] += self.clocktotalsecs(_clockname)
+                    _msg['Hidden']['laps'] += self.clocklapcount(_clockname)
         else:
             _msg = 'Summary for {0} stop watch\n'.format(self.title)
             _msg = '{0}{1}\n'.format(_msg, '=' * 90)
             hiddencount = 0
             hiddentime = 0.0
             hiddenlaps = 0
-            for _clock in self._clocks:
-                if _displayall or self._clocks[_clock]['display']:
-                    _msg = '{0}{1}\n'.format(_msg, self.get_clock_summary(_clockname=_clock))
+            _combined = 0
+            _overall = 0
+            for _clockname in self._clocks:
+                if _displayall or self._clocks[_clockname]['display']:
+                    _msg = '{0}{1}\n'.format(_msg, self.get_clock_summary(_clockname=_clockname))
                 else:
                     hiddencount += 1
-                    hiddentime += self.clocktotalsecs(_clock)
-                    hiddenlaps += self.clocklapcount(_clock)
-                _total += self._clocks[_clock]['total']
+                    hiddentime += self.clocktotalsecs(_clockname)
+                    hiddenlaps += self.clocklapcount(_clockname)
+                if default_is_overall and _clockname == self._defaultname:
+                    _overall = self.clocktotalsecs(_clockname)
+                elif not default_is_overall:
+                    _overall += self.clocktotalsecs(_clockname)
+                _combined += self.clocktotalsecs(_clockname)
             if hiddencount > 0:
                 _msg = '{0}{4}\n{1} Hidden Clock(s): {2:f} seconds in {3} lap(s)\n'.format(_msg, hiddencount,
                                                                                            hiddentime, hiddenlaps,
                                                                                            '-' * 90)
             _msg = '{0}{1}\n'.format(_msg, '=' * 90)
-            _msg = '{0}Total Duration: {1}'.format(_msg, self.__humanreadabletime(_total))
+            _msg = '{0}Total Duration: {1}'.format(_msg, self.__humanreadabletime(_overall))
+            if default_is_overall:
+                _msg = '{0}Total Duration (All Clocks): {1}'.format(_msg, self.__humanreadabletime(_combined))
         return _msg
 
 
