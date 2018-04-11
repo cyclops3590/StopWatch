@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/cyclops3590/StopWatch.svg?branch=master)](https://travis-ci.org/cyclops3590/StopWatch)
+[![PyPI version](https://badge.fury.io/py/pyStopWatch.svg)](https://badge.fury.io/py/pyStopWatch)
+[![Coverage](https://coveralls.io/repos/github/cyclops3590/StopWatch/badge.svg?branch=master)](https://coveralls.io/github/cyclops3590/StopWatch)
+
 StopWatch - Multi-clock
 =======================
 

@@ -167,3 +167,61 @@ class StopWatchTestCase(unittest.TestCase):
         self.__run_clocks(with_hidden=True)
         summary = self.stopwatch.get_summary(json=True)
         self.assertEqual(self.stopwatch.clocktotalsecs('default')+summary['Hidden']['total'],summary['Combined']['total'], 'Combined does not match default + hidden')
+
+
+    def test_AlreadyStartedException(self):
+        self.stopwatch.start()
+
+        self.assertRaises(StopWatchException, self.stopwatch.start)
+
+    def test_StartWhilePausedException(self):
+        self.stopwatch.start()
+        self.stopwatch.pause()
+        self.assertRaises(StopWatchException, self.stopwatch.start)
+
+    def test_AlreadyStoppedException(self):
+        self.assertRaises(StopWatchException, self.stopwatch.stop)
+
+    def test_AlreadyPausedException(self):
+        self.stopwatch.start()
+        self.stopwatch.pause()
+        self.assertRaises(StopWatchException, self.stopwatch.pause)
+
+    def test_AlreadyUnpausedException(self):
+        self.stopwatch.start()
+        self.assertRaises(StopWatchException, self.stopwatch.unpause)
+
+    def test_LapcountWhileStarted(self):
+        self.__run_clocks()
+        self.stopwatch.start()
+        time.sleep(1)
+        expected = 3
+        got = self.stopwatch.clocklapcount()
+        self.assertEqual(expected, got, 'Incorrect lap count')
+
+        expected = 5
+        got = int(self.stopwatch.clocktotalsecs())
+        self.assertEqual(expected, got, 'Incorrect clock total')
+
+    def test_StartAll(self):
+        self.__run_clocks(multi=True)
+        self.assertEqual(0,len(self.stopwatch.startedclocks()), 'Incorrect number of clocks running')
+
+        self.stopwatch.startall()
+        self.assertEqual(len(self.stopwatch.availableclocks()),len(self.stopwatch.startedclocks()), 'Incorrect number of clocks running')
+
+    def test_PauseAll(self):
+        self.stopwatch.start()
+        self.stopwatch.pause()
+        self.assertEqual(1, len(self.stopwatch.pausedclocks()))
+
+    def test_HasLapDetail(self):
+        self.stopwatch.start()
+        self.stopwatch.stop()
+        self.assertTrue(self.stopwatch.haslapdetail())
+
+    def test_NoLapDetail(self):
+        self.stopwatch = StopWatch()
+        self.stopwatch.start()
+        self.stopwatch.stop()
+        self.assertRaises(StopWatchException, self.stopwatch.lapdetail, 1)

@@ -8,7 +8,12 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  - "3.7-dev"
+install:
+ - pip install python-coveralls
+ - pip install 'coverage<4'
 # command to run tests
 script:
   - python setup.py test
+  - coverage run setup.py test
+after_success:
+    - coveralls

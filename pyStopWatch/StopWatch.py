@@ -110,18 +110,14 @@ class StopWatch(object):
 
     def clocklapcount(self, _clockname=None):
         """
-        Get lap count for a given clock including current lap if running
+        Get lap count for a given clock; includes current lap if running
         :param _clockname: clock name to retrieve lap count
         :type _clockname: str
         :return: lap count
         :rtype: int
         """
-        if not _clockname:
-            _clockname = self._defaultname
-        _laps = self._clocks[_clockname]['currentlap']
-        if self.isstarted(_clockname):
-            _laps += 1
-        return _laps
+        _clockname = _clockname or self._defaultname
+        return self._clocks[_clockname]['currentlap']
 
     def clocktotalsecs(self, _clockname=''):
         """
@@ -215,8 +211,7 @@ class StopWatch(object):
         :param _clockname:
         :return:
         """
-        if not _clockname:
-            _clockname = self._defaultname
+        _clockname = _clockname or self._defaultname
         _end = overrideend or datetime.utcnow()
         if self.ispaused(_clockname):
             raise StopWatchException('StopWatch clock, {0}, is already paused.  It must be unpaused first.'
@@ -224,7 +219,8 @@ class StopWatch(object):
         elif self.isstarted(_clockname):
             self._clocks[_clockname]['end'] = _end
             self._clocks[_clockname]['total'] += \
-                (self._clocks[_clockname].get('end') - self._clocks[_clockname].get('begin')).total_seconds()
+                (_end - self._clocks[_clockname]['begin']).total_seconds()
+
             self._clocks[_clockname]['paused'] = True
             if self._recordlapdetail:
                 self._clocks[_clockname]['lapdetail'][-1].pause(_end)
@@ -259,11 +255,9 @@ class StopWatch(object):
         :param _clockname:
         :return:
         """
-        if not _clockname:
-            _clockname = self._defaultname
-        if self._clocks[_clockname]['paused']:
-            return True
-        return False
+        clockname = _clockname or self._defaultname
+        return self._clocks[clockname]['paused']
+
 
     def stopall(self):
         """
@@ -302,7 +296,7 @@ class StopWatch(object):
         """
         if not _clockname:
             _clockname = self._defaultname
-        if self._clocks[_clockname]['begin'] is not None and self._clocks[_clockname]['end'] is None:
+        if self._clocks[_clockname]['begin'] is not None and self._clocks[_clockname]['end'] is None or self._clocks[_clockname]['paused']:
             return True
         return False
 
@@ -340,9 +334,8 @@ class StopWatch(object):
         :return: StopWatch stop status
         :rtype: bool
         """
-        if not _clockname:
-            _clockname = self._defaultname
-        if self._clocks[_clockname]['end'] is not None and self._clocks[_clockname]['begin'] is not None \
+        _clockname = _clockname or self._defaultname
+        if self._clocks[_clockname]['end'] is not None and self._clocks[_clockname]['begin'] is not None and self._clocks[_clockname]['paused'] is False \
                 or not self.everused(_clockname):
             return True
         return False
@@ -354,9 +347,8 @@ class StopWatch(object):
         :return: StopWatch used status
         :rtype: bool
         """
-        if not _clockname:
-            _clockname = self._defaultname
-        if self._clocks[_clockname]['currentlap'] > 0 or self._clocks[_clockname]['begin'] is not None:
+        _clockname = _clockname or self._defaultname
+        if self.clocklapcount(_clockname) > 0 or self._clocks[_clockname]['begin'] is not None:
             return True
         return False
 
@@ -382,7 +374,7 @@ class StopWatch(object):
 
         if self._recordlapdetail is False:
             raise StopWatchException('Lap detail not recorded')
-        elif lapnumber < 0 or lapnumber > len(self._clocks[_clockname]['lapdetail']):
+        elif lapnumber <= 0 or lapnumber > len(self._clocks[_clockname]['lapdetail']):
             raise StopWatchException('Lap {0} is invalid'.format(lapnumber))
         else:
             _lapobj = self._clocks[_clockname]['lapdetail'][lapnumber-1]
