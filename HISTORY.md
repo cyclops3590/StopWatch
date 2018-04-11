@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1 (2018-04-11)
+
+### Fix
+
+* Packaging wasn't updated for rst to md format change (#11) [cyclops3590]
+
+
 ## 0.9.0 (2018-04-02)
 
 ### New
@@ -10,7 +17,7 @@
 
 * Get everything up to date (#7) [cyclops3590]
 
-  * No timestring was returnged if 0 seconds.
+  * No timestring was returned if 0 seconds.
   * Summary strings had new line in bad place
   * Convert strings with variables to new format style
   * Summary wasn't printing as expected.
